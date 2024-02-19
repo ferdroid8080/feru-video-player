@@ -1,0 +1,86 @@
+---
+import PlayIcon from './icons/PlayIcon.astro';
+import PauseIcon from './icons/PauseIcon.astro';
+---
+
+<div class="h-screen w-full flex flex-col justify-center relative" id="VideoPlayerContainerId">
+  <div class="relative w-full"> <!-- video container -->
+    <video src="https://videos-ferudinato.s3.amazonaws.com/fsn-op-2.mp4" muted preload="metadata" class="w-full" id="VideoPlayerId" />
+  </div>
+  <div class="absolute w-full bottom-0 text-gray-300" id="VideoPlayerControlsId"> <!-- controls -->
+    <div class="flex items-center justify-center gap-10 py-16 bg-gradient-to-b from-transparent to-black">
+      <button class="flex" id="PlayButtonId">
+        <PlayIcon class="w-8 h-8" />
+      </button>
+      <button class="flex" id="PauseButtonId">
+        <PauseIcon class="w-8 h-8" />
+      </button>
+      <div class="h-1 w-9/12 rounded-2xl bg-gray-300 relative">
+        <div class="h-3 rounded-lg w-[8px] bg-red-300 absolute -top-1" id="VideoProgressbarId"></div>
+      </div>
+      <div>
+        <span id="VideoPlayerTimeId">00:00</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const videoPlayerContainer = document.getElementById('VideoPlayerContainerId') as HTMLDivElement;
+  const video = document.getElementById('VideoPlayerId') as HTMLVideoElement;
+  const videoControls = document.getElementById('VideoPlayerControlsId') as HTMLDivElement;
+  const playButton = document.getElementById('PlayButtonId') as HTMLButtonElement;
+  const pauseButton = document.getElementById('PauseButtonId') as HTMLButtonElement;
+  const VideoProgressbarId = document.getElementById('VideoProgressbarId') as HTMLDivElement;
+  const VideoPlayerTimeId = document.getElementById('VideoPlayerTimeId') as HTMLSpanElement;
+  
+  const onMouseEnterHandler = () => {
+    videoControls.classList.add('visible')
+    videoControls.classList.remove('invisible')
+  }
+
+  const onMouseLeaveHandler = () => {
+    videoControls.classList.remove('visible')
+    videoControls.classList.add('invisible')
+  }
+  
+  if (video) {
+    video.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+    })
+
+    if (video.paused) {
+      playButton.classList.remove('hidden');
+      pauseButton.classList.add('hidden');
+    } else {
+      playButton.classList.add('hidden');
+      pauseButton.classList.remove('hidden');
+    }
+
+    video.addEventListener('timeupdate', () => {
+      const { currentTime, duration } = video;
+      const progress = ((currentTime / duration * 100)).toFixed(2);
+      VideoProgressbarId.style.left = `${progress}%`;
+      
+      const minutes = Math.floor(currentTime / 60);
+      const seconds = Math.floor(currentTime) % 60;
+      VideoPlayerTimeId.textContent = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    })
+
+    videoPlayerContainer.addEventListener('mouseenter', onMouseEnterHandler);
+    videoPlayerContainer.addEventListener('mouseleave', onMouseLeaveHandler);
+    
+
+    playButton.addEventListener('click', () => {
+      video.play();
+      playButton.classList.add('hidden');
+      pauseButton.classList.remove('hidden');
+    })
+    pauseButton.addEventListener('click', () => {
+      video.pause();
+      playButton.classList.remove('hidden');
+      pauseButton.classList.add('hidden');
+    })
+  }
+  
+</script>
